@@ -59,7 +59,7 @@ DB_CONFIG = {
 
 # ✅ 현재 실행 환경 (환경변수 없으면 기본값은 'development')
 MODE = os.environ.get("FLASK_MODE", "development")
-BASE_NODE_URL = "http://localhost:5000" if MODE == "development" else "https://tripd.onrender.com"
+BASE_NODE_URL = "http://localhost:5000" if MODE == "development" else "https://pokachip.onrender.com"
 
 @app.route('/')
 def home():
