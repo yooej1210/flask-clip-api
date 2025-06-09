@@ -2,24 +2,43 @@ from flask import Flask, jsonify
 import pymysql
 import torch
 import os
-import requests  # ✅ 추가
+import requests
+import gdown
+import zipfile
 from PIL import Image
 from transformers import CLIPProcessor, CLIPModel
 
 app = Flask(__name__)
 
+# ✅ 경로 설정
+zip_path = "clip_model.zip"
+extract_path = "clip_finetuned_model"
+
+# ✅ 모델 폴더가 없으면 처음 실행 시 다운로드 + 압축 해제
+if not os.path.exists(extract_path):
+    print("📦 모델 다운로드 중...")
+    # 구글 드라이브 공유 ID 넣기 (예: '1a2B3c4D5e6F...')
+    gdown.download(id="oM2vOIeIsz_Ss11LrQXBj", output=zip_path, quiet=False)
+
+
+
+    print("📦 압축 해제 중...")
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_path)
+    print("✅ 모델 준비 완료")
+
 # ✅ 디바이스 설정 (GPU가 있으면 사용)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ✅ Fine-tuned CLIP 모델 로드
-model = CLIPModel.from_pretrained("./clip_finetuned_model").to(device)
-processor = CLIPProcessor.from_pretrained("./clip_finetuned_model")
+model = CLIPModel.from_pretrained(extract_path).to(device)
+processor = CLIPProcessor.from_pretrained(extract_path)
 model.eval()
 
 # ✅ 분류 대상 태그 클래스 (수정 가능)
 class_names = ["food", "people", "landscape", "accommodation"]
 
-# ✅ 이미지 분류 함수 (image_path → image_url로 변경)
+# ✅ 이미지 분류 함수
 def predict_tag(image_url):
     image = Image.open(requests.get(image_url, stream=True).raw).convert("RGB")
     inputs = processor(text=class_names, images=image, return_tensors="pt", padding=True).to(device)
@@ -34,21 +53,16 @@ DB_CONFIG = {
     'host': 'project-db-cgi.smhrd.com',
     'port': 3307,
     'user': 'cgi_24K_AI4_p3_2',
-    'password': 'smhrd2',  # ← 본인 비밀번호로 변경
-    'db': 'cgi_24K_AI4_p3_2',         # ← 본인 DB 이름으로 변경
+    'password': 'smhrd2',
+    'db': 'cgi_24K_AI4_p3_2',
     'charset': 'utf8mb4'
 }
 
-# ✅ VSCode 서버 쪽 uploads 폴더 절대 경로 (이제 사용 안함)
-UPLOADS_DIR = "C:/Users/smhrd/Desktop/pokachip/server/uploads"
-
-# ✅ Flask API 엔드포인트: /classify
 @app.route('/classify', methods=['POST'])
 def classify_images():
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-    # tags가 비어있는 항목들만 선택
     cursor.execute("SELECT photo_idx, file_name FROM photo_info WHERE tags IS NULL OR tags = ''")
     photos = cursor.fetchall()
 
@@ -56,11 +70,8 @@ def classify_images():
 
     for photo in photos:
         photo_idx = photo['photo_idx']
-        # 슬래시 정규화 + 파일명만 추출
         filename = os.path.basename(photo['file_name'].replace('\\', '/'))
-
-        # ✅ 이미지 URL 경로로 변경 (Node.js 서버 주소로 바꿔야 함)
-        image_url = f"https://your-node-app.onrender.com/uploads/{filename}"
+        image_url = f"https://your-node-app.onrender.com/uploads/{filename}"  # ← 실제 URL로 바꿔야 함
 
         try:
             tag = predict_tag(image_url)
@@ -79,6 +90,5 @@ def classify_images():
         "classified": classified_count
     })
 
-# ✅ 서버 실행
 if __name__ == '__main__':
     app.run(port=6006)

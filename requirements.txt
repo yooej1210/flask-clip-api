@@ -5,3 +5,4 @@ torch
 Pillow
 transformers
 requests
+gdown
