@@ -19,7 +19,8 @@ extract_path = "clip_finetuned_model"
 # ✅ 모델 폴더가 없으면 처음 실행 시 다운로드 + 압축 해제
 if not os.path.exists(extract_path):
     print("📦 모델 다운로드 중...")
-    gdown.download(id="1P8ynqxG221Qg81_KT4upfieA-knEeGf3", output=zip_path, quiet=False)
+    gdown.download(id="1ubujA5oDq_-wg0W-r6BmJi6NM0cIvFS4", output=zip_path, quiet=False)
+
 
     print("📦 압축 해제 중...")
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
