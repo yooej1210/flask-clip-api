@@ -21,7 +21,6 @@ if not os.path.exists(extract_path):
     print("📦 모델 다운로드 중...")
     gdown.download(id="1ubujA5oDq_-wg0W-r6BmJi6NM0cIvFS4", output=zip_path, quiet=False)
 
-
     print("📦 압축 해제 중...")
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(extract_path)
@@ -62,6 +61,10 @@ DB_CONFIG = {
 MODE = os.environ.get("FLASK_MODE", "development")
 BASE_NODE_URL = "http://localhost:5000" if MODE == "development" else "https://tripd.onrender.com"
 
+@app.route('/')
+def home():
+    return "✅ Flask 서버가 실행 중입니다!"
+
 @app.route('/classify', methods=['POST'])
 def classify_images():
     conn = pymysql.connect(**DB_CONFIG)
@@ -95,4 +98,5 @@ def classify_images():
     })
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=6006)
+    port = int(os.environ.get('PORT', 5000))  # ✅ Render 호환용 포트 설정
+    app.run(host="0.0.0.0", port=port)
