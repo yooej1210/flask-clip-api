@@ -18,7 +18,7 @@ extract_path = "clip_finetuned_model"
 if not os.path.exists(extract_path):
     print("📦 모델 다운로드 중...")
     # 구글 드라이브 공유 ID 넣기 (예: '1a2B3c4D5e6F...')
-    gdown.download(id="oM2vOIeIsz_Ss11LrQXBj", output=zip_path, quiet=False)
+    gdown.download(id="1F7CgArnvqK-oM2vOIeIsz_Ss11LrQXBj", output=zip_path, quiet=False)
 
 
 
