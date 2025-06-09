@@ -15,12 +15,10 @@ zip_path = "clip_model.zip"
 extract_path = "clip_finetuned_model"
 
 # ✅ 모델 폴더가 없으면 처음 실행 시 다운로드 + 압축 해제
+# ✅ 모델 폴더가 없으면 다운로드 + 압축 해제
 if not os.path.exists(extract_path):
     print("📦 모델 다운로드 중...")
-    # 구글 드라이브 공유 ID 넣기 (예: '1a2B3c4D5e6F...')
-    gdown.download(id="1F7CgArnvqK-oM2vOIeIsz_Ss11LrQXBj", output=zip_path, quiet=False)
-
-
+    gdown.download(id="1P8ynqxG221Qg81_KT4upfieA-knEeGf3", output=zip_path, quiet=False)
 
     print("📦 압축 해제 중...")
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
